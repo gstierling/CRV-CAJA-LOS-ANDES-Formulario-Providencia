@@ -3,501 +3,388 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Caja Los Andes · CicloRecreoVía</title>
+<title>CLA Providencia · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #00b4d8;
-    --surface: #0096c7;
-    --border: rgba(255,255,255,0.25);
-    --orange: #f5a623;
-    --teal: #ffffff;
-    --red: #ff4d4d;
-    --text: #ffffff;
-    --muted: rgba(255,255,255,0.75);
-    --radius: 14px;
-    --btn-confirm: #f5a623;
-    --btn-back: rgba(255,255,255,0.2);
+    --surface: rgba(0,0,0,0.18);
+    --surface2: rgba(0,0,0,0.28);
+    --border: rgba(255,255,255,0.18);
+    --orange: #f97316;
+    --white: #ffffff;
+    --muted: rgba(255,255,255,0.6);
   }
-
   body {
+    background: linear-gradient(160deg, #0097a7 0%, #006978 100%);
+    color: var(--white);
     font-family: 'Nunito', sans-serif;
-    background: linear-gradient(160deg, #00c8e8 0%, #0096c7 100%);
-    color: var(--text);
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
+    padding: 2rem 1.5rem 3rem;
   }
+  .container { max-width: 960px; margin: 0 auto; }
 
-  .card {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 24px;
-    padding: 28px 20px;
-    width: 100%;
-    max-width: 500px;
-    text-align: center;
-    backdrop-filter: blur(8px);
-  }
+  /* Header */
+  .header { margin-bottom: 2rem; text-align: center; }
+  .header-top { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 2px; }
+  .live-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--orange); flex-shrink: 0; animation: pulse 1.8s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.8)} }
+  .title { font-size: 2.2rem; font-weight: 900; color: var(--white); letter-spacing: 0.04em; }
+  .title-sub { font-size: 1.3rem; font-weight: 700; color: rgba(255,255,255,0.7); margin-top: 0; }
+  .last-updated { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
 
-  .logo-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
+  .error-msg { background: rgba(150,20,20,0.4); border: 1px solid rgba(255,100,100,0.4); border-radius: 10px; padding: 14px 18px; color: #ffaaaa; font-size: 1rem; margin-bottom: 1.5rem; display: none; }
 
-  .logo-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--orange);
-  }
+  /* Selector */
+  .selector-block { margin-bottom: 2.5rem; }
+  .btn-total { display: block; width: 100%; padding: 18px; background: var(--surface); border: 2px solid var(--border); border-radius: 14px; color: var(--white); font-family: 'Nunito', sans-serif; font-size: 1.6rem; font-weight: 900; letter-spacing: 0.1em; cursor: pointer; margin-bottom: 1.2rem; transition: all 0.15s; }
+  .btn-total:hover { background: rgba(0,0,0,0.35); }
+  .btn-total.active { background: var(--orange); border-color: var(--orange); }
+  .ultimos-label { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 10px; }
+  .tabs { display: flex; gap: 10px; }
+  .tab { flex: 1; padding: 13px 10px; border-radius: 12px; border: 2px solid var(--border); font-size: 1rem; font-family: 'Nunito', sans-serif; font-weight: 800; cursor: pointer; background: var(--surface); color: var(--white); transition: all 0.15s; text-align: center; }
+  .tab:hover { background: rgba(0,0,0,0.35); }
+  .tab.active { background: var(--orange); border-color: var(--orange); }
 
-  .logo-text {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.8);
-  }
+  /* Section label grande — igual para todos los títulos de sección */
+  .section-label-big { font-size: 1.4rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.75); margin-bottom: 12px; }
 
-  h1 {
-    font-size: 22px;
-    font-weight: 900;
-    line-height: 1.3;
-    color: #fff;
-    margin-bottom: 28px;
-  }
+  /* TRANSACCIONES cuadro — solo número y tasa, sin título dentro */
+  .trans-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 16px; padding: 16px 24px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .trans-value { font-size: 4rem; font-weight: 900; color: var(--white); line-height: 1; }
+  .trans-rate { font-size: 1.4rem; font-weight: 800; color: rgba(255,255,255,0.75); }
 
-  .rut-label {
-    font-size: 52px;
-    font-weight: 900;
-    color: #fff;
-    letter-spacing: 0.04em;
-    margin-bottom: 16px;
-    margin-top: 8px;
-  }
+  /* Barras */
+  .chart-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 16px; padding: 16px 16px 0; margin-bottom: 14px; }
+  .bars-wrap { display: flex; align-items: flex-end; justify-content: space-around; gap: 14px; padding: 0 6px; height: 200px; }
+  .bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; height: 100%; }
+  .bar-stack { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+  .bar-val { font-size: 1.4rem; font-weight: 900; color: var(--white); line-height: 1; margin-bottom: 5px; }
+  .bar-inner { width: 100%; border-radius: 10px 10px 0 0; min-height: 4px; }
+  .bar-rate-row { display: flex; width: 100%; }
+  .bar-rate { flex: 1; text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--muted); padding: 6px 2px 12px; }
+  .bar-label-row { display: flex; width: 100%; border-top: 1px solid var(--border); }
+  .bar-label { flex: 1; text-align: center; font-size: 1rem; font-weight: 800; color: rgba(255,255,255,0.85); padding: 10px 4px 12px; }
 
-  input[type="text"] {
-    width: 100%;
-    padding: 18px;
-    background: rgba(255,255,255,0.2);
-    border: 2px solid rgba(255,255,255,0.4);
-    border-radius: var(--radius);
-    color: #fff;
-    font-family: 'Nunito', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-align: center;
-    outline: none;
-    transition: border-color 0.2s;
-    margin-bottom: 20px;
-  }
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 
-  input[type="text"]:focus {
-    border-color: #fff;
-    background: rgba(255,255,255,0.28);
-  }
+  /* Franja horizontal */
+  .strip { display: flex; gap: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .strip-item { flex: 1; padding: 18px 12px; text-align: center; border-right: 1px solid var(--border); }
+  .strip-item:last-child { border-right: none; }
+  .strip-label { font-size: 0.8rem; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+  .strip-value { font-size: 2.8rem; font-weight: 900; color: var(--white); line-height: 1; }
+  .strip-value.afiliado { color: #b2ebf2; }
+  .strip-value.noafiliado { color: var(--orange); }
+  .strip-value.s1 { color: #fde047; }
+  .strip-value.s2 { color: #a78bfa; }
+  .strip-value.s3 { color: #34d399; }
+  .strip-rate { font-size: 0.85rem; color: var(--muted); margin-top: 6px; font-weight: 600; }
 
-  input[type="text"]::placeholder {
-    color: rgba(255,255,255,0.4);
-    font-weight: 400;
-    font-size: 18px;
-  }
-
-  .btn {
-    width: 100%;
-    padding: 20px;
-    background: var(--orange);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius);
-    font-family: 'Nunito', sans-serif;
-    font-size: 26px;
-    font-weight: 900;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    letter-spacing: 0.03em;
-  }
-
-  .btn:hover { opacity: 0.9; }
-  .btn:active { transform: scale(0.98); }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .btn-back {
-    width: 100%;
-    padding: 16px;
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-    border: 2px solid rgba(255,255,255,0.4);
-    border-radius: var(--radius);
-    font-family: 'Nunito', sans-serif;
-    font-size: 18px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    margin-top: 8px;
-  }
-
-  .btn-back:hover { opacity: 0.85; }
-  .btn-back:active { transform: scale(0.98); }
-
-  /* Resultado B1 - No pertenece */
-  .result-no {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .result-no .icon { font-size: 72px; line-height: 1; }
-
-  .result-no .msg {
-    font-size: 30px;
-    font-weight: 900;
-    color: #fff;
-    line-height: 1.2;
-    background: rgba(255,0,0,0.25);
-    border-radius: 14px;
-    padding: 16px;
-    width: 100%;
-  }
-
-  .result-no .sub {
-    font-size: 16px;
-    color: rgba(255,255,255,0.8);
-  }
-
-  /* Resultado B2 - Sí pertenece */
-  .result-yes {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .result-yes .icon { font-size: 72px; line-height: 1; }
-
-  .result-yes .msg-excelente {
-    font-size: 42px;
-    font-weight: 900;
-    color: #fff;
-    line-height: 1;
-    letter-spacing: 0.04em;
-  }
-
-  .result-yes .msg-sub {
-    font-size: 24px;
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.2;
-    margin-top: -8px;
-  }
-
-  .services-label {
-    font-size: 22px;
-    font-weight: 900;
-    color: #fff;
-    text-align: center;
-    line-height: 1.3;
-  }
-
-  .services-hint {
-    font-size: 15px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.75);
-    margin-top: 4px;
-  }
-
-  .services-list {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .service-item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 18px 20px;
-    background: rgba(255,255,255,0.15);
-    border: 2px solid rgba(255,255,255,0.25);
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    text-align: left;
-  }
-
-  .service-item:hover { border-color: rgba(255,255,255,0.7); }
-
-  .service-item.selected {
-    border-color: #fff;
-    background: rgba(255,255,255,0.28);
-  }
-
-  .service-item input[type="checkbox"] { display: none; }
-
-  .check-box {
-    width: 28px;
-    height: 28px;
-    border: 2px solid rgba(255,255,255,0.4);
-    border-radius: 7px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, border-color 0.2s;
-    font-size: 16px;
-    color: transparent;
-  }
-
-  .service-item.selected .check-box {
-    background: var(--orange);
-    border-color: var(--orange);
-    color: #fff;
-  }
-
-  .service-emoji { font-size: 28px; }
-
-  .service-name {
-    font-size: 18px;
-    font-weight: 800;
-    color: #fff;
-  }
-
-  /* Paso final - Confirmación */
-  .result-done {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .result-done .icon {
-    font-size: 80px;
-    line-height: 1;
-    animation: pop 0.4s ease;
-  }
-
-  .result-done .msg-listo {
-    font-size: 56px;
-    font-weight: 900;
-    color: #fff;
-    line-height: 1;
-    letter-spacing: 0.04em;
-  }
-
-  .result-done .msg-sub {
-    font-size: 22px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.4;
-  }
-
-  @keyframes pop {
-    0% { transform: scale(0.5); opacity: 0; }
-    70% { transform: scale(1.15); }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  .step { display: none; }
-  .step.active { display: block; }
-  .result-no.active,
-  .result-yes.active,
-  .result-done.active { display: flex; }
-
-  .error-msg {
-    color: #ffe066;
-    font-size: 14px;
-    font-weight: 700;
-    margin-top: -14px;
-    margin-bottom: 14px;
-    display: none;
-  }
-
-  .sending {
-    font-size: 14px;
-    color: rgba(255,255,255,0.7);
-    margin-top: 8px;
-    display: none;
-  }
+  /* BBDD button */
+  .bbdd-wrap { margin-top: 2.5rem; text-align: center; }
+  .bbdd-btn { display: inline-block; padding: 12px 36px; background: var(--surface); border: 2px solid var(--border); border-radius: 12px; color: #b2ebf2; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: 0.1em; text-decoration: none; transition: all 0.15s; }
+  .bbdd-btn:hover { background: rgba(0,0,0,0.35); border-color: #b2ebf2; }
 </style>
 </head>
 <body>
+<div class="container">
 
-<div class="card">
-
-  <div class="logo-bar">
-    <div class="logo-dot"></div>
-    <span class="logo-text">CicloRecreoVía × Caja Los Andes</span>
-    <div class="logo-dot"></div>
-  </div>
-
-  <!-- PASO 1: RUT -->
-  <div class="step active" id="step1">
-    <h1>Verifica a qué CAJA perteneces y obtén beneficios si perteneces a CAJA LOS ANDES</h1>
-
-    <div class="rut-label">RUT</div>
-
-    <input type="text" id="rut" placeholder="Ej: 12345678" maxlength="12" autocomplete="off" inputmode="numeric" />
-    <div class="error-msg" id="error-rut">Ingresa solo números, sin puntos ni dígito verificador.</div>
-
-    <button class="btn" onclick="verificarRUT()">Verificar →</button>
-  </div>
-
-  <!-- RESULTADO B1: No pertenece -->
-  <div class="result-no" id="result-no">
-    <div class="icon">😔</div>
-    <div class="msg">Lo sentimos, no perteneces a CAJA LOS ANDES</div>
-    <div class="sub">Tu RUT no corresponde a esta caja de compensación.</div>
-    <button class="btn-back" onclick="reiniciar()">← Volver a consulta de RUT</button>
-  </div>
-
-  <!-- RESULTADO B2: Sí pertenece -->
-  <div class="result-yes" id="result-yes">
-    <div class="icon">🎉</div>
-    <div class="msg-excelente">EXCELENTE</div>
-    <div class="msg-sub">¡Perteneces a CAJA LOS ANDES!</div>
-
-    <div class="services-label">Indica a qué servicios quieres acceder</div>
-    <div class="services-hint">(puedes escoger más de uno)</div>
-
-    <div class="services-list">
-      <label class="service-item" onclick="toggleService(this)">
-        <input type="checkbox" value="Kit saludable (Agua + Fruta)">
-        <span class="check-box">✓</span>
-        <span class="service-emoji">🥤</span>
-        <span class="service-name">Kit saludable (Agua + Fruta)</span>
-      </label>
-      <label class="service-item" onclick="toggleService(this)">
-        <input type="checkbox" value="Préstamo de bicicleta">
-        <span class="check-box">✓</span>
-        <span class="service-emoji">🚲</span>
-        <span class="service-name">Préstamo de bicicleta</span>
-      </label>
-      <label class="service-item" onclick="toggleService(this)">
-        <input type="checkbox" value="Reparaciones mecánicas">
-        <span class="check-box">✓</span>
-        <span class="service-emoji">🔧</span>
-        <span class="service-name">Reparaciones mecánicas</span>
-      </label>
+  <div class="header">
+    <div class="header-top">
+      <span class="live-dot"></span>
+      <span class="title">CAJA LOS ANDES</span>
     </div>
-
-    <button class="btn" id="btn-enviar" onclick="enviarServicios()" disabled style="font-size:22px;">Confirmar servicios →</button>
-    <div class="sending" id="sending-msg">Enviando... ⏳</div>
+    <div class="title-sub">Providencia</div>
+    <div class="last-updated" id="last-updated">Cargando…</div>
   </div>
 
-  <!-- PASO FINAL: Confirmación -->
-  <div class="result-done" id="result-done">
-    <div class="icon">✅</div>
-    <div class="msg-listo">¡LISTO!</div>
-    <div class="msg-sub">Acércate a una de las promotoras y solicita él o los servicios que hayas escogido.</div>
-    <button class="btn-back" onclick="reiniciar()">← Volver a consulta de RUT</button>
+  <div id="error-msg" class="error-msg"></div>
+
+  <!-- Selector -->
+  <div class="selector-block">
+    <button class="btn-total active" data-min="0" onclick="setWindow(0)">TOTAL</button>
+    <div class="ultimos-label">Últimos</div>
+    <div class="tabs">
+      <button class="tab" data-min="15" onclick="setWindow(15)">15 Minutos</button>
+      <button class="tab" data-min="30" onclick="setWindow(30)">30 Minutos</button>
+      <button class="tab" data-min="60" onclick="setWindow(60)">60 Minutos</button>
+    </div>
+  </div>
+
+  <!-- TRANSACCIONES -->
+  <div class="section-label-big">Transacciones</div>
+  <div class="trans-block">
+    <div class="trans-value" id="val-svc-total">—</div>
+    <div class="trans-rate" id="rate-svc-total">— x min</div>
+  </div>
+
+  <!-- Barras -->
+  <div class="chart-card">
+    <div class="bars-wrap" id="bars-wrap"></div>
+    <div class="bar-rate-row" id="bar-rates"></div>
+    <div class="bar-label-row" id="bar-labels"></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- REGISTROS -->
+  <div class="section-label-big">Registros</div>
+  <div class="strip">
+    <div class="strip-item">
+      <div class="strip-label">Totales</div>
+      <div class="strip-value" id="val-total">—</div>
+      <div class="strip-rate" id="rate-total">— x min</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-label">Afiliados</div>
+      <div class="strip-value afiliado" id="val-si">—</div>
+      <div class="strip-rate" id="rate-si">— x min</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-label">No afiliados</div>
+      <div class="strip-value noafiliado" id="val-no">—</div>
+      <div class="strip-rate" id="rate-no">— x min</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- AFILIADOS USAN SERVICIOS -->
+  <div class="section-label-big">Afiliados usan servicios</div>
+  <div class="strip">
+    <div class="strip-item">
+      <div class="strip-label">1 Servicio</div>
+      <div class="strip-value s1" id="val-s1">—</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-label">2 Servicios</div>
+      <div class="strip-value s2" id="val-s2">—</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-label">3 Servicios</div>
+      <div class="strip-value s3" id="val-s3">—</div>
+    </div>
+  </div>
+
+  <!-- BBDD -->
+  <div class="bbdd-wrap">
+    <a class="bbdd-btn" href="https://docs.google.com/spreadsheets/d/1J48WDExtFgjx22Zf9rjTR8IdhAmffc_Dzpw086Cimeo/edit" target="_blank">BBDD</a>
   </div>
 
 </div>
 
 <script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXrQ1RK0d8GM6MwX7iK31NQegKTXBX6k46c0TjiBzfmsTpPr5YnIe0waFd_nKgmgxfPQ/exec";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSgndIP_bFGXJWbQgdvRlszrL4rqZzkeNuI7iXxkNiuW9HMSHA0oZIfIKo7Zu31HYnn7K_LbuHpkCTK/pub?gid=1084445575&single=true&output=csv";
 
-  let rutIngresado = "";
+const SVCS = [
+  { key: "Préstamo de bicicleta",        label: "Bicis",    color: "#f97316" },
+  { key: "Kit saludable (Agua + Fruta)",  label: "Kits",     color: "#fde047" },
+  { key: "Reparaciones mecánicas",        label: "Mecánica", color: "#a78bfa" },
+];
 
-  function verificarRUT() {
-    const input = document.getElementById("rut");
-    const errorEl = document.getElementById("error-rut");
-    const val = input.value.trim().replace(/\./g, "").replace(/-/g, "");
+let records = [];
+let currentWindow = 0;
 
-    if (!/^\d+$/.test(val)) {
-      errorEl.style.display = "block";
-      input.style.borderColor = "rgba(255,100,100,0.8)";
-      return;
+function parseTS(str) {
+  if (!str) return null;
+  try {
+    const isPM = /p\.\s*m\./.test(str);
+    const clean = str.replace(/[ap]\.\s*m\./g, "").trim();
+    const [datePart, timePart] = clean.split(", ");
+    if (!datePart || !timePart) return null;
+    const [d, m, y] = datePart.split("-").map(Number);
+    let [h, min, s] = timePart.trim().split(":").map(Number);
+    if (isPM && h !== 12) h += 12;
+    if (!isPM && h === 12) h = 0;
+    return new Date(y, m - 1, d, h, min, s || 0);
+  } catch(e) { return null; }
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split("\n");
+  const result = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const fields = [];
+    let cur = "", inQ = false;
+    for (let c = 0; c < line.length; c++) {
+      const ch = line[c];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { fields.push(cur); cur = ""; }
+      else { cur += ch; }
     }
+    fields.push(cur);
+    const ts = (fields[0] || "").replace(/^"|"$/g, "");
+    const pertenece = (fields[2] || "").replace(/^"|"$/g, "").trim();
+    const servicios = (fields[3] || "").replace(/^"|"$/g, "").trim();
+    const date = parseTS(ts);
+    if (date) result.push({ pertenece, servicios, date });
+  }
+  return result;
+}
 
-    errorEl.style.display = "none";
-    input.style.borderColor = "rgba(255,255,255,0.4)";
-    rutIngresado = val;
+// Formatea número con 1 decimal y coma como separador
+function fmt(v) {
+  return v.toFixed(1).replace(".", ",");
+}
 
-    const ultimoDigito = parseInt(val.slice(-1));
-    document.getElementById("step1").classList.remove("active");
+async function fetchOnce() {
+  const res = await fetch(CSV_URL + "&cb=" + Date.now(), { cache: "no-store" });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  const text = await res.text();
+  // Validación básica de integridad: el CSV debe tener encabezado + al menos 1 fila,
+  // y la última línea no debe verse cortada a medias (sin coincidencia de comillas).
+  const trimmed = text.trim();
+  if (!trimmed) throw new Error("Respuesta vacía");
+  const quoteCount = (trimmed.match(/"/g) || []).length;
+  if (quoteCount % 2 !== 0) throw new Error("CSV truncado");
+  return parseCSV(trimmed);
+}
 
-    if (ultimoDigito !== 8) {
-      document.getElementById("result-no").classList.add("active");
-      enviarDatos(rutIngresado, "No pertenece", "");
-    } else {
-      document.getElementById("result-yes").classList.add("active");
+async function fetchData() {
+  const prevCount = records.length;
+  let result = null;
+  let lastErr = null;
+
+  // Hasta 3 intentos: protege contra respuestas truncadas en redes móviles inestables.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const parsed = await fetchOnce();
+      // Si ya teníamos datos y el nuevo resultado viene sospechosamente más corto
+      // (caída brusca de registros), reintenta antes de aceptarlo.
+      if (prevCount > 0 && parsed.length < prevCount * 0.5 && attempt < 2) {
+        await new Promise(r => setTimeout(r, 400));
+        continue;
+      }
+      result = parsed;
+      break;
+    } catch (e) {
+      lastErr = e;
+      await new Promise(r => setTimeout(r, 400));
     }
   }
 
-  function toggleService(el) {
-    const checkbox = el.querySelector("input[type='checkbox']");
-    checkbox.checked = !checkbox.checked;
-    el.classList.toggle("selected", checkbox.checked);
-    actualizarBoton();
+  if (result) {
+    records = result;
+    document.getElementById("error-msg").style.display = "none";
+  } else if (lastErr && records.length === 0) {
+    const el = document.getElementById("error-msg");
+    el.style.display = "block";
+    el.textContent = "No se pudo cargar la planilla: " + lastErr.message;
   }
+  render();
+}
 
-  function actualizarBoton() {
-    const checked = document.querySelectorAll(".service-item input:checked").length;
-    document.getElementById("btn-enviar").disabled = checked === 0;
-  }
-
-  function enviarServicios() {
-    const servicios = [];
-    document.querySelectorAll(".service-item input:checked").forEach(cb => {
-      servicios.push(cb.value);
-    });
-
-    document.getElementById("btn-enviar").disabled = true;
-    document.getElementById("sending-msg").style.display = "block";
-
-    enviarDatos(rutIngresado, "Sí pertenece", servicios.join(" | "), function() {
-      document.getElementById("result-yes").classList.remove("active");
-      document.getElementById("result-done").classList.add("active");
-    });
-  }
-
-  function enviarDatos(rut, pertenece, servicios, callback) {
-    const payload = {
-      timestamp: new Date().toLocaleString("es-CL"),
-      rut: rut,
-      pertenece: pertenece,
-      servicios: servicios
-    };
-
-    fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    })
-    .then(() => { if (callback) callback(); })
-    .catch(() => { if (callback) callback(); });
-  }
-
-  function reiniciar() {
-    document.getElementById("result-no").classList.remove("active");
-    document.getElementById("result-done").classList.remove("active");
-    document.getElementById("rut").value = "";
-    document.getElementById("step1").classList.add("active");
-    // Reset checkboxes
-    document.querySelectorAll(".service-item").forEach(el => el.classList.remove("selected"));
-    document.querySelectorAll(".service-item input").forEach(cb => cb.checked = false);
-    document.getElementById("btn-enviar").disabled = true;
-    document.getElementById("sending-msg").style.display = "none";
-    rutIngresado = "";
-  }
-
-  document.getElementById("rut").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") verificarRUT();
+function setWindow(mins) {
+  currentWindow = mins;
+  document.querySelectorAll(".btn-total, .tab").forEach(b => {
+    b.classList.toggle("active", +b.dataset.min === mins);
   });
-</script>
+  render();
+}
 
+function getMins() {
+  const now = new Date();
+  if (currentWindow > 0) return currentWindow;
+  const start9 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0);
+  return Math.max(1, Math.round((now - start9) / 60000));
+}
+
+function render() {
+  const now = new Date();
+  const isTotal = currentWindow === 0;
+  const cutoff = isTotal ? new Date(0) : new Date(now.getTime() - currentWindow * 60000);
+  const subset = records.filter(r => r.date >= cutoff);
+  const mins = getMins();
+
+  const total = subset.length;
+  const si = subset.filter(r => r.pertenece === "Sí pertenece").length;
+  const no = subset.filter(r => r.pertenece === "No pertenece").length;
+
+  const svcCounts = {};
+  SVCS.forEach(s => svcCounts[s.key] = 0);
+  let totalSvc = 0;
+  subset.forEach(r => {
+    if (r.servicios) {
+      r.servicios.split(" | ").forEach(s => {
+        s = s.trim();
+        if (s in svcCounts) { svcCounts[s]++; totalSvc++; }
+      });
+    }
+  });
+
+  let s1 = 0, s2 = 0, s3 = 0;
+  subset.filter(r => r.pertenece === "Sí pertenece").forEach(r => {
+    if (!r.servicios) return;
+    const n = r.servicios.split(" | ").filter(x => x.trim()).length;
+    if (n === 1) s1++;
+    else if (n === 2) s2++;
+    else if (n >= 3) s3++;
+  });
+
+  // TRANSACCIONES
+  document.getElementById("val-svc-total").textContent = totalSvc;
+  document.getElementById("rate-svc-total").textContent = fmt(totalSvc / mins) + " x min";
+
+  // REGISTROS
+  document.getElementById("val-total").textContent = total;
+  document.getElementById("rate-total").textContent = fmt(total / mins) + " x min";
+  document.getElementById("val-si").textContent = si;
+  document.getElementById("rate-si").textContent = fmt(si / mins) + " x min";
+  document.getElementById("val-no").textContent = no;
+  document.getElementById("rate-no").textContent = fmt(no / mins) + " x min";
+
+  // AFILIADOS USAN SERVICIOS (sin tasa)
+  document.getElementById("val-s1").textContent = s1;
+  document.getElementById("val-s2").textContent = s2;
+  document.getElementById("val-s3").textContent = s3;
+
+  // Barras
+  const counts = SVCS.map(s => svcCounts[s.key] || 0);
+  const maxVal = Math.max(...counts, 1);
+  const BAR_MAX_H = 160;
+
+  const wrap = document.getElementById("bars-wrap");
+  const ratesRow = document.getElementById("bar-rates");
+  const labelsRow = document.getElementById("bar-labels");
+  wrap.innerHTML = "";
+  ratesRow.innerHTML = "";
+  labelsRow.innerHTML = "";
+
+  SVCS.forEach((svc, i) => {
+    const c = counts[i];
+    const barH = Math.max(4, Math.round((c / maxVal) * BAR_MAX_H));
+
+    const col = document.createElement("div");
+    col.className = "bar-col";
+    col.innerHTML = `
+      <div class="bar-stack" style="height:${BAR_MAX_H}px;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">
+        <div class="bar-val" style="margin-bottom:5px;">${c}</div>
+        <div class="bar-inner" style="height:${barH}px;background:${svc.color};"></div>
+      </div>
+    `;
+    wrap.appendChild(col);
+
+    const rd = document.createElement("div");
+    rd.className = "bar-rate";
+    rd.textContent = fmt(c / mins) + " x min";
+    ratesRow.appendChild(rd);
+
+    const lbl = document.createElement("div");
+    lbl.className = "bar-label";
+    lbl.textContent = svc.label;
+    labelsRow.appendChild(lbl);
+  });
+
+  document.getElementById("last-updated").textContent =
+    "Actualizado " + now.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+fetchData();
+setInterval(fetchData, 30000);
+</script>
 </body>
 </html>
