@@ -35,6 +35,23 @@
 
   .error-msg { background: rgba(150,20,20,0.4); border: 1px solid rgba(255,100,100,0.4); border-radius: 10px; padding: 14px 18px; color: #ffaaaa; font-size: 1rem; margin-bottom: 1.5rem; display: none; }
 
+  /* Selector de fecha */
+  .date-block { display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem; gap: 6px; }
+  .date-label { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .date-input {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    color: var(--white);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 10px 18px;
+    cursor: pointer;
+    color-scheme: dark;
+  }
+  .date-input:focus { outline: none; border-color: var(--orange); }
+
   /* Selector */
   .selector-block { margin-bottom: 2.5rem; }
   .btn-total { display: block; width: 100%; padding: 18px; background: var(--surface); border: 2px solid var(--border); border-radius: 14px; color: var(--white); font-family: 'Nunito', sans-serif; font-size: 1.6rem; font-weight: 900; letter-spacing: 0.1em; cursor: pointer; margin-bottom: 1.2rem; transition: all 0.15s; }
@@ -98,6 +115,25 @@
     </div>
     <div class="title-sub">Providencia</div>
     <div class="last-updated" id="last-updated">Cargando…</div>
+  </div>
+
+  <!-- Selector de fecha -->
+  <div class="date-block">
+    <label for="date-picker" class="date-label">Fecha</label>
+    <input type="date" id="date-picker" class="date-input" onchange="onDateChange()">
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="section-label-big">Resumen</div>
+  <div class="strip" style="margin-bottom: 2rem;">
+    <div class="strip-item">
+      <div class="strip-label">Total Transacciones</div>
+      <div class="strip-value" id="val-resumen-trans">—</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-label">Total Afiliados</div>
+      <div class="strip-value afiliado" id="val-resumen-afi">—</div>
+    </div>
   </div>
 
   <div id="error-msg" class="error-msg"></div>
@@ -186,6 +222,17 @@ const SVCS = [
 
 let records = [];
 let currentWindow = 0;
+let selectedDate = null; // null = hoy
+
+function dateKey(d) {
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function onDateChange() {
+  const val = document.getElementById("date-picker").value;
+  selectedDate = val ? val : null;
+  render();
+}
 
 function parseTS(str) {
   if (!str) return null;
@@ -235,8 +282,6 @@ async function fetchOnce() {
   const res = await fetch(CSV_URL + "&cb=" + Date.now(), { cache: "no-store" });
   if (!res.ok) throw new Error("HTTP " + res.status);
   const text = await res.text();
-  // Validación básica de integridad: el CSV debe tener encabezado + al menos 1 fila,
-  // y la última línea no debe verse cortada a medias (sin coincidencia de comillas).
   const trimmed = text.trim();
   if (!trimmed) throw new Error("Respuesta vacía");
   const quoteCount = (trimmed.match(/"/g) || []).length;
@@ -245,21 +290,13 @@ async function fetchOnce() {
 }
 
 async function fetchData() {
-  const prevCount = records.length;
-  let result = null;
+  let parsed = null;
   let lastErr = null;
 
-  // Hasta 3 intentos: protege contra respuestas truncadas en redes móviles inestables.
+  // Hasta 3 intentos ante fallas de red o respuestas truncadas.
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const parsed = await fetchOnce();
-      // Si ya teníamos datos y el nuevo resultado viene sospechosamente más corto
-      // (caída brusca de registros), reintenta antes de aceptarlo.
-      if (prevCount > 0 && parsed.length < prevCount * 0.5 && attempt < 2) {
-        await new Promise(r => setTimeout(r, 400));
-        continue;
-      }
-      result = parsed;
+      parsed = await fetchOnce();
       break;
     } catch (e) {
       lastErr = e;
@@ -267,8 +304,14 @@ async function fetchData() {
     }
   }
 
-  if (result) {
-    records = result;
+  if (parsed) {
+    // REGLA CLAVE: Google Sheets a veces sirve una versión cacheada/parcial de la
+    // publicación CSV. Nunca aceptamos un resultado con MENOS filas que el que ya
+    // tenemos validado — los registros no desaparecen de la planilla, así que una
+    // caída en el conteo siempre significa una respuesta incompleta, nunca un dato real.
+    if (parsed.length >= records.length) {
+      records = parsed;
+    }
     document.getElementById("error-msg").style.display = "none";
   } else if (lastErr && records.length === 0) {
     const el = document.getElementById("error-msg");
@@ -289,15 +332,39 @@ function setWindow(mins) {
 function getMins() {
   const now = new Date();
   if (currentWindow > 0) return currentWindow;
-  const start9 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0);
-  return Math.max(1, Math.round((now - start9) / 60000));
+  // TOTAL: desde las 9:00 AM del día seleccionado (o de hoy si no se eligió fecha)
+  let base = now;
+  if (selectedDate) {
+    const [y, m, d] = selectedDate.split("-").map(Number);
+    base = new Date(y, m - 1, d);
+  }
+  const start9 = new Date(base.getFullYear(), base.getMonth(), base.getDate(), 9, 0, 0);
+  const end = selectedDate && dateKey(base) !== dateKey(now) ? new Date(base.getFullYear(), base.getMonth(), base.getDate(), 23, 59, 59) : now;
+  return Math.max(1, Math.round((end - start9) / 60000));
 }
 
 function render() {
   const now = new Date();
   const isTotal = currentWindow === 0;
+
+  // Filtrar primero por la fecha seleccionada (si hay alguna elegida)
+  let dayFiltered = records;
+  if (selectedDate) {
+    dayFiltered = records.filter(r => dateKey(r.date) === selectedDate);
+  }
+
+  // Para RESUMEN: totales del día completo seleccionado (o de todos los registros si no hay fecha elegida)
+  const resumenSet = selectedDate ? dayFiltered : records;
+  let resumenTrans = 0;
+  resumenSet.forEach(r => {
+    if (r.servicios) resumenTrans += r.servicios.split(" | ").filter(x => x.trim()).length;
+  });
+  const resumenAfi = resumenSet.filter(r => r.pertenece === "Sí pertenece").length;
+  document.getElementById("val-resumen-trans").textContent = resumenTrans;
+  document.getElementById("val-resumen-afi").textContent = resumenAfi;
+
   const cutoff = isTotal ? new Date(0) : new Date(now.getTime() - currentWindow * 60000);
-  const subset = records.filter(r => r.date >= cutoff);
+  const subset = isTotal ? dayFiltered : dayFiltered.filter(r => r.date >= cutoff);
   const mins = getMins();
 
   const total = subset.length;
@@ -385,6 +452,15 @@ function render() {
 
 fetchData();
 setInterval(fetchData, 30000);
+
+// Inicializar selector de fecha con el día de hoy
+(function initDatePicker() {
+  const now = new Date();
+  const todayKey = dateKey(now);
+  const picker = document.getElementById("date-picker");
+  picker.value = todayKey;
+  selectedDate = todayKey;
+})();
 </script>
 </body>
 </html>
